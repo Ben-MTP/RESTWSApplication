@@ -1,0 +1,31 @@
+<wsdl:definitions
+     name="CreateRESTService"
+     targetNamespace="http://xmlns.oracle.com/pcbpel/adapter/http/RESTWSApplication/RestfulWSProject/CreateRESTService"
+     xmlns:tns="http://xmlns.oracle.com/pcbpel/adapter/http/RESTWSApplication/RestfulWSProject/CreateRESTService"
+     xmlns:plt="http://schemas.xmlsoap.org/ws/2003/05/partner-link/"
+     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+     xmlns:msg_in_out="http://www.example.org"
+    >
+  <plt:partnerLinkType name="Request_Response_plt" >
+    <plt:role name="Request-Response_role" >
+      <plt:portType name="tns:Request_Response_ptt" />
+    </plt:role>
+  </plt:partnerLinkType>
+    <wsdl:types>
+      <schema xmlns="http://www.w3.org/2001/XMLSchema" >
+        <import namespace="http://www.example.org" schemaLocation="../Schemas/RestfulService.xsd" />
+      </schema>
+    </wsdl:types>
+    <wsdl:message name="exampleElement_msg_in">
+        <wsdl:part name="exampleElement" element="msg_in_out:exampleElement"/>
+    </wsdl:message>
+    <wsdl:message name="Response_msg_out">
+        <wsdl:part name="Response" element="msg_in_out:Response"/>
+    </wsdl:message>
+    <wsdl:portType name="Request_Response_ptt">
+        <wsdl:operation name="Request-Response">
+            <wsdl:input message="tns:exampleElement_msg_in"/>
+            <wsdl:output message="tns:Response_msg_out"/>
+        </wsdl:operation>
+    </wsdl:portType>
+</wsdl:definitions>

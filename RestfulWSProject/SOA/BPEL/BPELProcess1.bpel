@@ -1,0 +1,48 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer
+
+  Created: Fri Jul 17 15:40:09 ICT 2020
+  Author:  ManhKM
+  Type: BPEL 2.0 Process
+  Purpose: Empty BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="BPELProcess1"
+               targetNamespace="http://xmlns.oracle.com/RESTWSApplication/RestfulWSProject/BPELProcess1"
+               xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+               xmlns:client="http://xmlns.oracle.com/RESTWSApplication/RestfulWSProject/BPELProcess1"
+               xmlns:ora="http://schemas.oracle.com/xpath/extension"
+               xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+               xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/http/RESTWSApplication/RestfulWSProject/CreateRESTService"
+         xmlns:ns2="http://www.example.org">
+
+  <!--
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ORCHESTRATION LOGIC
+     Set of activities coordinating the flow of messages across the
+     services integrated within this business process
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <partnerLinks>
+    <partnerLink name="CreateRESTService" partnerLinkType="ns1:Request_Response_plt" myRole="Request-Response_role"/>
+  </partnerLinks>
+  <variables>
+    <variable name="Receive1_Request-Response_InputVariable" messageType="ns1:exampleElement_msg_in"/>
+    <variable name="Reply1_Request-Response_OutputVariable" messageType="ns1:Response_msg_out"/>
+  </variables>
+  <sequence name="main">
+    <receive name="ReceiveRestService" createInstance="yes" partnerLink="CreateRESTService" portType="ns1:Request_Response_ptt"
+             operation="Request-Response" variable="Receive1_Request-Response_InputVariable"/>
+    <assign name="Assign1">
+      <copy>
+        <from>$Receive1_Request-Response_InputVariable.exampleElement/ns2:input</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$Reply1_Request-Response_OutputVariable.Response/ns2:output</to>
+      </copy>
+    </assign>
+    <reply name="ReplyRestService" partnerLink="CreateRESTService" variable="Reply1_Request-Response_OutputVariable"
+           portType="ns1:Request_Response_ptt" operation="Request-Response"/>
+  </sequence>
+</process>

@@ -1,0 +1,87 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Fri Jul 17 16:31:46 ICT 2020
+  Author:  ManhKM
+  Type: BPEL 2.0 Process
+  Purpose: Synchronous BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="BPELProcess1"
+               targetNamespace="http://xmlns.oracle.com/RESTWSApplication/CallRESTWSProject/BPELProcess1"
+               xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+               xmlns:client="http://xmlns.oracle.com/RESTWSApplication/CallRESTWSProject/BPELProcess1"
+               xmlns:ora="http://schemas.oracle.com/xpath/extension"
+               xmlns:ui="http://xmlns.oracle.com/soa/designer"
+               xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/http/RESTWSApplication/CallRESTWSProject/CallingRESTfulWS"
+         xmlns:ns2="http://www.example.org">
+
+    <import ui:processWSDL="true" namespace="http://xmlns.oracle.com/RESTWSApplication/CallRESTWSProject/BPELProcess1" location="../WSDLs/BPELProcess1.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        PARTNERLINKS                                                      
+        List of services participating in this BPEL process               
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    --> 
+  <partnerLinks>
+    <!-- 
+      The 'client' role represents the requester of this service. It is 
+      used for callback. The location and correlation information associated
+      with the client role are automatically set using WS-Addressing.
+    -->
+    <partnerLink name="bpelprocess1_client" partnerLinkType="client:BPELProcess1" myRole="BPELProcess1Provider"/>
+    <partnerLink name="CallingRESTfulWS" partnerLinkType="ns1:Request_Response_plt"
+                 partnerRole="Request-Response_role"/>
+  </partnerLinks>
+
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      VARIABLES                                                        
+      List of messages and XML documents used within this BPEL process 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <variables>
+    <!-- Reference to the message passed as input during initiation -->
+    <variable name="inputVariable" messageType="client:BPELProcess1RequestMessage"/>
+
+    <!-- Reference to the message that will be returned to the requester-->
+    <variable name="outputVariable" messageType="client:BPELProcess1ResponseMessage"/>
+    <variable name="Invoke1_Request-Response_InputVariable" messageType="ns1:exampleElement_msg_in"/>
+    <variable name="Invoke1_Request-Response_OutputVariable" messageType="ns1:Response_msg_out"/>
+  </variables>
+
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ORCHESTRATION LOGIC                                               
+     Set of activities coordinating the flow of messages across the    
+     services integrated within this business process                  
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <sequence name="main">
+
+    <!-- Receive input from requestor. (Note: This maps to operation defined in BPELProcess1.wsdl) -->
+    <receive name="receiveInput" partnerLink="bpelprocess1_client" portType="client:BPELProcess1" operation="process" variable="inputVariable" createInstance="yes"/>
+    <assign name="AssignReceiveInput" validate="yes">
+      <copy>
+        <from>$inputVariable.payload/client:input</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$Invoke1_Request-Response_InputVariable.exampleElement/ns2:input</to>
+      </copy>
+    </assign>
+    <invoke name="Invoke_RESTfulWS" partnerLink="CallingRESTfulWS"
+            portType="ns1:Request_Response_ptt" operation="Request-Response"
+            inputVariable="Invoke1_Request-Response_InputVariable"
+            outputVariable="Invoke1_Request-Response_OutputVariable" bpelx:invokeAsDetail="no"/>
+    <assign name="AssignInvokeOutput" validate="yes">
+      <copy>
+        <from>$Invoke1_Request-Response_OutputVariable.Response/ns2:output</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$outputVariable.payload/client:result</to>
+      </copy>
+    </assign>
+    <!-- Generate reply to synchronous request -->
+    <reply name="replyOutput" partnerLink="bpelprocess1_client" portType="client:BPELProcess1" operation="process" variable="outputVariable"/>
+  </sequence>
+</process>
